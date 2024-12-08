@@ -5,43 +5,13 @@ export const Container = styled.div`
   flex-direction: column;
   height: 100vh;
   font-family: Arial, sans-serif;
-`;
-
-export const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #282c34;
-  color: white;
-`;
-
-export const Logo = styled.h1`
-  font-size: 24px;
-`;
-
-export const Nav = styled.nav`
-  display: flex;
-  gap: 10px;
-`;
-
-export const NavButton = styled.a`
-  color: white;
-  text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid white;
-  border-radius: 4px;
-  &:hover {
-    background-color: white;
-    color: #282c34;
-    transition: 0.3s;
-  }
+  background: linear-gradient(135deg, #1a1a1a, #333);
 `;
 
 export const HeroSection = styled.section`
   flex: 1;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding: 20px;
 `;
@@ -54,9 +24,13 @@ export const HeroText = styled.div`
   }
   p {
     font-size: 1.2rem;
-    color: #555;
+    color: #fff;
     margin: 10px 0;
   }
+`;
+
+export const Title = styled.h1`
+    color: white;
 `;
 
 export const CTAButtons = styled.div`
@@ -74,6 +48,7 @@ font-size: 1rem;
 border: none;
 border-radius: 6px;
 cursor: pointer;
+text-decoration: none;
 transition: background 0.3s, transform 0.2s;
 
 &:hover {
@@ -89,12 +64,4 @@ transition: background 0.3s, transform 0.2s;
 export const HeroImage = styled.img`
   max-width: 400px;
   border-radius: 10px;
-`;
-
-export const Footer = styled.footer`
-  text-align: center;
-  padding: 10px 20px;
-  background-color: #f1f1f1;
-  color: #555;
-  font-size: 0.9rem;
 `;
