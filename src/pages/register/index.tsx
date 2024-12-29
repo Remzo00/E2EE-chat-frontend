@@ -1,3 +1,4 @@
+import { useContext, useState } from "react";
 import {
   Container,
   Form,
@@ -7,17 +8,59 @@ import {
   Link,
   Title,
 } from "./index.styled";
+import { AuthContext } from "../../context";
 
 export default function Register() {
+  const { register, isLoading, error } = useContext(AuthContext);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await register(formData.username, formData.email, formData.password);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
   return (
     <Container>
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <Title>Register</Title>
-        <Input type="text" placeholder="Full Name" />
-        <Input type="email" placeholder="Email" />
-        <Input type="password" placeholder="Password" />
-        <Input type="password" placeholder="Confirm Password" />
-        <Button>Sign Up</Button>
+        <Input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <Input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <Button disabled={isLoading}>
+          {isLoading ? "Loading..." : "Sign Up"}
+        </Button>
+        {error && <p>{error}</p>}
         <Footer>
           Already have an account? <Link href="/login">Login</Link>
         </Footer>

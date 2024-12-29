@@ -8,7 +8,7 @@ height: 100vh;
 background: linear-gradient(135deg, #1a1a1a, #333);
 `;
 
-export const Form = styled.div`
+export const Form = styled.form`
 background: #252525;
 padding: 40px;
 border-radius: 12px;
