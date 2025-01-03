@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Button,
   Container,
@@ -9,13 +9,21 @@ import {
   Link,
 } from "./index.styled";
 import { AuthContext } from "../../context";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login, isLoading, error } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { login, isLoading, error, isAuthenticated } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/chat-rooms");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

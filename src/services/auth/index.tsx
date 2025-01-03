@@ -30,8 +30,6 @@ export const loginUser = async (values: {
   email: string;
   password: string;
 }) => {
-  console.log("Attempting login with:", values);
-  console.log("API URL:", API_URL);
   try {
     const config = {
       headers: {

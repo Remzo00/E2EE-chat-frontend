@@ -1,4 +1,12 @@
-import { Container, Header, RoomItem, RoomList } from "./index.styled";
+import { useContext } from "react";
+import { AuthContext } from "../../context";
+import {
+  Container,
+  Header,
+  LogoutButton,
+  RoomItem,
+  RoomList,
+} from "./index.styled";
 
 interface SidebarProps {
   chatRooms: string[];
@@ -6,6 +14,11 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ chatRooms, onRoomSelect }: SidebarProps) {
+  const { logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logout();
+  };
   return (
     <Container>
       <Header>Chat Rooms</Header>
@@ -16,6 +29,7 @@ export default function Sidebar({ chatRooms, onRoomSelect }: SidebarProps) {
           </RoomItem>
         ))}
       </RoomList>
+      <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
     </Container>
   );
 }

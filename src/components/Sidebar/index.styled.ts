@@ -35,3 +35,14 @@ export const RoomItem = styled.li`
     color: #ff7f11;
   }
 `;
+
+export const LogoutButton = styled.button`
+  background: #ff7f11;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px;
+  border-radius: 5px;
+`

@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import { User } from "../types";
 import { loginUser, registerUser } from "../services/auth";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +51,16 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
