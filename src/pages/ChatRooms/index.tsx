@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   MainContent,
@@ -10,6 +10,7 @@ import {
 import Sidebar from "../../components/Sidebar";
 import MessageInput from "../../components/MessageInput";
 import Message from "../../components/Message";
+import { socketConfig } from "../../utils/socketConfig.ts";
 
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
@@ -18,12 +19,45 @@ export default function ChatRooms() {
     [room: string]: { text: string; isSentByUser: boolean }[];
   }>({});
 
+  useEffect(() => {
+    socketConfig.on(
+      "receive_message",
+      (data: { room: string; text: string; senderId: string }) => {
+        if (data.senderId === socketConfig.id) return;
+
+        setMessagesByRoom((prev) => {
+          const roomMessages = prev[data.room] || [];
+          return {
+            ...prev,
+            [data.room]: [
+              ...roomMessages,
+              { text: data.text, isSentByUser: false },
+            ],
+          };
+        });
+      }
+    );
+
+    return () => {
+      socketConfig.off("receive_message");
+    };
+  }, []);
+
   const handleRoomSelect = (room: string) => {
     setSelectedRoom(room);
+    socketConfig.emit("join_room", room);
   };
 
   const handleSendMessage = (message: string) => {
     if (!selectedRoom) return;
+
+    const messageData = {
+      text: message,
+      room: selectedRoom,
+      isSentByUser: true,
+    };
+
+    socketConfig.emit("send_message", messageData);
 
     setMessagesByRoom((prev) => {
       const roomMessages = prev[selectedRoom] || [];
@@ -35,19 +69,6 @@ export default function ChatRooms() {
         ],
       };
     });
-
-    setTimeout(() => {
-      setMessagesByRoom((prev) => {
-        const roomMessages = prev[selectedRoom] || [];
-        return {
-          ...prev,
-          [selectedRoom]: [
-            ...roomMessages,
-            { text: `Response to: "${message}"`, isSentByUser: false },
-          ],
-        };
-      });
-    }, 1000);
   };
 
   const currentMessages = selectedRoom
