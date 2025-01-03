@@ -14,28 +14,46 @@ import Message from "../../components/Message";
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [messages, setMessages] = useState<
-    { text: string; isSentByUser: boolean }[]
-  >([]);
+  const [messagesByRoom, setMessagesByRoom] = useState<{
+    [room: string]: { text: string; isSentByUser: boolean }[];
+  }>({});
 
   const handleRoomSelect = (room: string) => {
     setSelectedRoom(room);
-    setMessages([]); // Reset messages when switching rooms
   };
 
   const handleSendMessage = (message: string) => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { text: message, isSentByUser: true },
-    ]);
-    // Simulate receiving a response from the other user
+    if (!selectedRoom) return;
+
+    setMessagesByRoom((prev) => {
+      const roomMessages = prev[selectedRoom] || [];
+      return {
+        ...prev,
+        [selectedRoom]: [
+          ...roomMessages,
+          { text: message, isSentByUser: true },
+        ],
+      };
+    });
+
     setTimeout(() => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: `Response to: "${message}"`, isSentByUser: false },
-      ]);
+      setMessagesByRoom((prev) => {
+        const roomMessages = prev[selectedRoom] || [];
+        return {
+          ...prev,
+          [selectedRoom]: [
+            ...roomMessages,
+            { text: `Response to: "${message}"`, isSentByUser: false },
+          ],
+        };
+      });
     }, 1000);
   };
+
+  const currentMessages = selectedRoom
+    ? messagesByRoom[selectedRoom] || []
+    : [];
+
   return (
     <Container>
       <Sidebar chatRooms={chatRooms} onRoomSelect={handleRoomSelect} />
@@ -48,7 +66,7 @@ export default function ChatRooms() {
         {selectedRoom ? (
           <ChatSection>
             <MessagesContainer>
-              {messages.map((msg, index) => (
+              {currentMessages.map((msg, index) => (
                 <Message
                   key={index}
                   text={msg.text}
