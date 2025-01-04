@@ -56,22 +56,31 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
+    console.log("Stored token on load:", storedToken);
+    console.log("Stored user on load:", storedUser);
+
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setIsAuthenticated(true);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log("Parsed user:", parsedUser);
+        setUser(parsedUser);
+        setToken(storedToken);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error("Error parsing stored user:", err);
+      }
     }
   }, []);
-
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await loginUser({ email, password });
-      setUser(data.user);
-      setToken(data.token);
+      setUser(data.token.user);
+      setToken(data.token.token);
       setIsAuthenticated(true);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token.token);
+      localStorage.setItem("user", JSON.stringify(data.token.user));
       navigate("/chat-rooms");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -89,11 +98,11 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     setError(null);
     try {
       const data = await registerUser({ username, email, password });
-      setUser(data.user);
-      setToken(data.token);
+      setUser(data.token.user);
+      setToken(data.token.token);
       setIsAuthenticated(true);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token.token);
+      localStorage.setItem("user", JSON.stringify(data.token.user));
       navigate("/chat-rooms");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -108,6 +117,8 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     setIsAuthenticated(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.setItem("isAuthenticated", "true");
+
     navigate("/login");
   };
 

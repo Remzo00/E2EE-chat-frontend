@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Container,
   MainContent,
@@ -11,18 +11,31 @@ import Sidebar from "../../components/Sidebar";
 import MessageInput from "../../components/MessageInput";
 import Message from "../../components/Message";
 import { socketConfig } from "../../utils/socketConfig.ts";
+import { AuthContext } from "../../context/index.tsx";
 
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [messagesByRoom, setMessagesByRoom] = useState<{
-    [room: string]: { text: string; isSentByUser: boolean }[];
+    [room: string]: {
+      text: string;
+      isSentByUser: boolean;
+      senderName: string;
+    }[];
   }>({});
+
+  const { user } = useContext(AuthContext);
+  const username = user?.username || "Anonymous";
 
   useEffect(() => {
     socketConfig.on(
       "receive_message",
-      (data: { room: string; text: string; senderId: string }) => {
+      (data: {
+        room: string;
+        text: string;
+        senderId: string;
+        senderName: string;
+      }) => {
         if (data.senderId === socketConfig.id) return;
 
         setMessagesByRoom((prev) => {
@@ -31,7 +44,11 @@ export default function ChatRooms() {
             ...prev,
             [data.room]: [
               ...roomMessages,
-              { text: data.text, isSentByUser: false },
+              {
+                text: data.text,
+                isSentByUser: false,
+                senderName: data.senderName,
+              },
             ],
           };
         });
@@ -55,6 +72,7 @@ export default function ChatRooms() {
       text: message,
       room: selectedRoom,
       isSentByUser: true,
+      senderName: username,
     };
 
     socketConfig.emit("send_message", messageData);
@@ -65,7 +83,7 @@ export default function ChatRooms() {
         ...prev,
         [selectedRoom]: [
           ...roomMessages,
-          { text: message, isSentByUser: true },
+          { text: message, isSentByUser: true, senderName: username || "" },
         ],
       };
     });
@@ -92,6 +110,7 @@ export default function ChatRooms() {
                   key={index}
                   text={msg.text}
                   isSentByUser={msg.isSentByUser}
+                  username={msg.senderName}
                 />
               ))}
             </MessagesContainer>
