@@ -56,13 +56,9 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    console.log("Stored token on load:", storedToken);
-    console.log("Stored user on load:", storedUser);
-
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log("Parsed user:", parsedUser);
         setUser(parsedUser);
         setToken(storedToken);
         setIsAuthenticated(true);

@@ -12,10 +12,12 @@ import MessageInput from "../../components/MessageInput";
 import Message from "../../components/Message";
 import { socketConfig } from "../../utils/socketConfig.ts";
 import { AuthContext } from "../../context/index.tsx";
+import { Encryption } from "../../utils/encryption.ts";
 
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
   const [messagesByRoom, setMessagesByRoom] = useState<{
     [room: string]: {
       text: string;
@@ -30,63 +32,103 @@ export default function ChatRooms() {
   useEffect(() => {
     socketConfig.on(
       "receive_message",
-      (data: {
+      async (data: {
+        encryptedData: number[];
+        iv: number[];
         room: string;
-        text: string;
-        senderId: string;
         senderName: string;
       }) => {
-        if (data.senderId === socketConfig.id) return;
+        if (!encryptionKey) return;
 
-        setMessagesByRoom((prev) => {
-          const roomMessages = prev[data.room] || [];
-          return {
+        try {
+          const encryptedArray = new Uint8Array(data.encryptedData);
+          const ivArray = new Uint8Array(data.iv);
+
+          const decryptedMessage = await Encryption.decryptMessage(
+            encryptedArray,
+            ivArray,
+            encryptionKey
+          );
+
+          setMessagesByRoom((prev) => ({
             ...prev,
             [data.room]: [
-              ...roomMessages,
+              ...(prev[data.room] || []),
               {
-                text: data.text,
+                text: decryptedMessage,
                 isSentByUser: false,
                 senderName: data.senderName,
               },
             ],
-          };
-        });
+          }));
+        } catch (error) {
+          console.error("Error decrypting message:", error);
+        }
       }
     );
 
     return () => {
       socketConfig.off("receive_message");
     };
-  }, []);
+  }, [encryptionKey]);
 
-  const handleRoomSelect = (room: string) => {
+  const handleRoomSelect = async (room: string) => {
     setSelectedRoom(room);
     socketConfig.emit("join_room", room);
+
+    const key = await Encryption.generateAESKey();
+    setEncryptionKey(key);
+
+    const exportedKey = await Encryption.exportKey(key);
+    socketConfig.emit("share_key", { room, key: Array.from(exportedKey) });
   };
 
-  const handleSendMessage = (message: string) => {
-    if (!selectedRoom) return;
+  useEffect(() => {
+    socketConfig.on(
+      "receive_key",
+      async (data: { room: string; key: number[] }) => {
+        if (selectedRoom === data.room) {
+          const importedKey = await Encryption.importKey(
+            new Uint8Array(data.key)
+          );
+          setEncryptionKey(importedKey);
+        }
+      }
+    );
 
-    const messageData = {
-      text: message,
-      room: selectedRoom,
-      isSentByUser: true,
-      senderName: username,
+    return () => {
+      socketConfig.off("receive_key");
     };
+  }, [selectedRoom]);
 
-    socketConfig.emit("send_message", messageData);
+  const handleSendMessage = async (message: string) => {
+    if (!selectedRoom || !encryptionKey) return;
 
-    setMessagesByRoom((prev) => {
-      const roomMessages = prev[selectedRoom] || [];
-      return {
+    try {
+      const { encryptedData, iv } = await Encryption.encryptMessage(
+        message,
+        encryptionKey
+      );
+
+      const messageData = {
+        encryptedData: Array.from(encryptedData),
+        iv: Array.from(iv),
+        room: selectedRoom,
+        senderName: username,
+      };
+
+      socketConfig.emit("send_message", messageData);
+
+      setMessagesByRoom((prev) => ({
         ...prev,
         [selectedRoom]: [
-          ...roomMessages,
-          { text: message, isSentByUser: true, senderName: username || "" },
+          ...(prev[selectedRoom] || []),
+          { text: message, isSentByUser: true, senderName: username },
         ],
-      };
-    });
+      }));
+    } catch (error) {
+      console.error("Error encrypting message:", error);
+    }
   };
 
   const currentMessages = selectedRoom
