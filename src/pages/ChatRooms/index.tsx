@@ -13,6 +13,10 @@ import Message from "../../components/Message";
 import { socketConfig } from "../../utils/socketConfig.ts";
 import { AuthContext } from "../../context/index.tsx";
 import { Encryption } from "../../utils/encryption.ts";
+import {
+  getMessagesByRoom,
+  saveMessage,
+} from "../../services/message/index.ts";
 
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
@@ -33,19 +37,22 @@ export default function ChatRooms() {
     socketConfig.on(
       "receive_message",
       async (data: {
-        encryptedData: number[];
-        iv: number[];
+        encryptedData: string;
+        iv: string;
         room: string;
         senderName: string;
       }) => {
         if (!encryptionKey) return;
 
         try {
-          const encryptedArray = new Uint8Array(data.encryptedData);
-          const ivArray = new Uint8Array(data.iv);
+          // Parsiraj encryptedData i iv iz stringa u Uint8Array
+          const encryptedDataArray = new Uint8Array(
+            data.encryptedData.split(",").map(Number)
+          );
+          const ivArray = new Uint8Array(data.iv.split(",").map(Number));
 
           const decryptedMessage = await Encryption.decryptMessage(
-            encryptedArray,
+            encryptedDataArray,
             ivArray,
             encryptionKey
           );
@@ -76,11 +83,28 @@ export default function ChatRooms() {
     setSelectedRoom(room);
     socketConfig.emit("join_room", room);
 
-    const key = await Encryption.generateAESKey();
-    setEncryptionKey(key);
+    try {
+      // Učitajte poruke iz baze
+      const messages = await getMessagesByRoom(room);
 
-    const exportedKey = await Encryption.exportKey(key);
-    socketConfig.emit("share_key", { room, key: Array.from(exportedKey) });
+      // Dodajte učitane poruke u stanje
+      setMessagesByRoom((prev) => ({
+        ...prev,
+        [room]: messages.map((msg) => ({
+          text: msg.encryptedData, // Pretpostavimo da će decryptMessage biti potreban ovde
+          isSentByUser: msg.senderName === username,
+          senderName: msg.senderName,
+        })),
+      }));
+
+      const key = await Encryption.generateAESKey();
+      setEncryptionKey(key);
+
+      const exportedKey = await Encryption.exportKey(key);
+      socketConfig.emit("share_key", { room, key: Array.from(exportedKey) });
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
   };
 
   useEffect(() => {
@@ -111,14 +135,20 @@ export default function ChatRooms() {
       );
 
       const messageData = {
-        encryptedData: Array.from(encryptedData),
-        iv: Array.from(iv),
+        encryptedData: Array.from(encryptedData).join(","),
+        iv: Array.from(iv).join(","),
         room: selectedRoom,
         senderName: username,
+        timestamp: new Date(),
       };
 
+      // Emitujte poruku preko socket-a
       socketConfig.emit("send_message", messageData);
 
+      // Spremite poruku u bazu
+      await saveMessage(messageData);
+
+      // Dodajte poruku u lokalno stanje za prikaz u UI-ju
       setMessagesByRoom((prev) => ({
         ...prev,
         [selectedRoom]: [
@@ -127,10 +157,9 @@ export default function ChatRooms() {
         ],
       }));
     } catch (error) {
-      console.error("Error encrypting message:", error);
+      console.error("Error encrypting or saving message:", error);
     }
   };
-
   const currentMessages = selectedRoom
     ? messagesByRoom[selectedRoom] || []
     : [];
