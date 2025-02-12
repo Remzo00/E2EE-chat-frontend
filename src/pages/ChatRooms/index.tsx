@@ -166,9 +166,7 @@ export default function ChatRooms() {
       <Sidebar chatRooms={chatRooms} onRoomSelect={handleRoomSelect} />
       <MainContent>
         <Header>
-          {selectedRoom
-            ? `Chat Room: ${selectedRoom}`
-            : "Welcome to the Chat App"}
+          {selectedRoom ? `Chat Room: ${selectedRoom}` : `Hello ${username}`}
         </Header>
         {selectedRoom ? (
           <ChatSection>

@@ -33,7 +33,7 @@ export default function Login() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.type]: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -44,6 +44,7 @@ export default function Login() {
         <Input
           type="email"
           placeholder="Email"
+          name="email"
           value={formData.email}
           onChange={handleChange}
           disabled={isLoading}
@@ -51,6 +52,7 @@ export default function Login() {
         <Input
           type="password"
           placeholder="Password"
+          name="password"
           value={formData.password}
           onChange={handleChange}
           disabled={isLoading}
