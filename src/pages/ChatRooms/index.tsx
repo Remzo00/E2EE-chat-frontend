@@ -34,45 +34,33 @@ export default function ChatRooms() {
   const username = user?.username || "Anonymous";
 
   useEffect(() => {
-    socketConfig.on(
-      "receive_message",
-      async (data: {
-        encryptedData: string;
-        iv: string;
-        room: string;
-        senderName: string;
-      }) => {
-        if (!encryptionKey) return;
+    socketConfig.on("receive_message", async (data) => {
+      if (!encryptionKey) return;
 
-        try {
-          // Parsiraj encryptedData i iv iz stringa u Uint8Array
-          const encryptedDataArray = new Uint8Array(
-            data.encryptedData.split(",").map(Number)
-          );
-          const ivArray = new Uint8Array(data.iv.split(",").map(Number));
+      try {
+        const decryptedMessage = await Encryption.decryptMessage(
+          data.encryptedData,
+          data.iv,
+          encryptionKey
+        );
 
-          const decryptedMessage = await Encryption.decryptMessage(
-            encryptedDataArray,
-            ivArray,
-            encryptionKey
-          );
-
-          setMessagesByRoom((prev) => ({
-            ...prev,
-            [data.room]: [
-              ...(prev[data.room] || []),
-              {
-                text: decryptedMessage,
-                isSentByUser: false,
-                senderName: data.senderName,
-              },
-            ],
-          }));
-        } catch (error) {
-          console.error("Error decrypting message:", error);
-        }
+        setMessagesByRoom((prev) => ({
+          ...prev,
+          [data.room]: [
+            ...(prev[data.room] || []),
+            {
+              text: decryptedMessage,
+              encryptedData: data.encryptedData,
+              iv: data.iv,
+              isSentByUser: false,
+              senderName: data.senderName,
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Error decrypting message:", error);
       }
-    );
+    });
 
     return () => {
       socketConfig.off("receive_message");
@@ -84,37 +72,39 @@ export default function ChatRooms() {
     socketConfig.emit("join_room", room);
 
     try {
-      // Učitajte poruke iz baze
-      const messages = await getMessagesByRoom(room);
-
-      // Dodajte učitane poruke u stanje
-      setMessagesByRoom((prev) => ({
-        ...prev,
-        [room]: messages.map((msg) => ({
-          text: msg.encryptedData, // Pretpostavimo da će decryptMessage biti potreban ovde
-          isSentByUser: msg.senderName === username,
-          senderName: msg.senderName,
-        })),
-      }));
-
       const key = await Encryption.generateAESKey();
       setEncryptionKey(key);
 
       const exportedKey = await Encryption.exportKey(key);
-      socketConfig.emit("share_key", { room, key: Array.from(exportedKey) });
+      socketConfig.emit("share_key", { room, key: exportedKey });
+
+      const messages = await getMessagesByRoom(room);
+
+      const decryptedMessages = await Promise.all(
+        messages.map(async (msg) => ({
+          text: await Encryption.decryptMessage(msg.encryptedData, msg.iv, key),
+          encryptedData: msg.encryptedData,
+          iv: msg.iv,
+          isSentByUser: msg.senderName === username,
+          senderName: msg.senderName,
+        }))
+      );
+
+      setMessagesByRoom((prev) => ({
+        ...prev,
+        [room]: decryptedMessages,
+      }));
     } catch (error) {
-      console.error("Error loading messages:", error);
+      console.error("Error setting up room:", error);
     }
   };
 
   useEffect(() => {
     socketConfig.on(
       "receive_key",
-      async (data: { room: string; key: number[] }) => {
+      async (data: { room: string; key: string }) => {
         if (selectedRoom === data.room) {
-          const importedKey = await Encryption.importKey(
-            new Uint8Array(data.key)
-          );
+          const importedKey = await Encryption.importKey(data.key);
           setEncryptionKey(importedKey);
         }
       }
@@ -129,35 +119,42 @@ export default function ChatRooms() {
     if (!selectedRoom || !encryptionKey) return;
 
     try {
+      // Enkriptuj poruku
       const { encryptedData, iv } = await Encryption.encryptMessage(
         message,
         encryptionKey
       );
 
       const messageData = {
-        encryptedData: Array.from(encryptedData).join(","),
-        iv: Array.from(iv).join(","),
+        encryptedData,
+        iv,
         room: selectedRoom,
         senderName: username,
         timestamp: new Date(),
       };
 
-      // Emitujte poruku preko socket-a
-      socketConfig.emit("send_message", messageData);
-
-      // Spremite poruku u bazu
+      // Sačuvaj u bazu
       await saveMessage(messageData);
 
-      // Dodajte poruku u lokalno stanje za prikaz u UI-ju
+      // Emituj poruku
+      socketConfig.emit("send_message", messageData);
+
+      // Dodaj u lokalni state
       setMessagesByRoom((prev) => ({
         ...prev,
         [selectedRoom]: [
           ...(prev[selectedRoom] || []),
-          { text: message, isSentByUser: true, senderName: username },
+          {
+            text: message,
+            encryptedData,
+            iv,
+            isSentByUser: true,
+            senderName: username,
+          },
         ],
       }));
     } catch (error) {
-      console.error("Error encrypting or saving message:", error);
+      console.error("Error encrypting or sending message:", error);
     }
   };
   const currentMessages = selectedRoom
