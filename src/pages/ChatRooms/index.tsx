@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import {
   Container,
   MainContent,
@@ -13,157 +13,79 @@ import Message from "../../components/Message";
 import { socketConfig } from "../../utils/socketConfig.ts";
 import { AuthContext } from "../../context/index.tsx";
 import { Encryption } from "../../utils/encryption.ts";
-import {
-  getMessagesByRoom,
-  saveMessage,
-} from "../../services/message/index.ts";
+import { saveMessage } from "../../services/message/index.ts";
+import { useChatRoom } from "../../hooks/useChatRoom.ts";
+import { useChatSocket } from "../../hooks/useChatSocket.ts";
+import { MessageType } from "../../types/index.tsx";
 
 export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
-  const [messagesByRoom, setMessagesByRoom] = useState<{
-    [room: string]: {
-      text: string;
-      isSentByUser: boolean;
-      senderName: string;
-    }[];
-  }>({});
 
   const { user } = useContext(AuthContext);
   const username = user?.username || "Anonymous";
 
-  useEffect(() => {
-    socketConfig.on("receive_message", async (data) => {
-      if (!encryptionKey) return;
+  const {
+    selectedRoom,
+    encryptionKey,
+    messagesByRoom,
+    handleRoomSelect,
+    setMessagesByRoom,
+    setEncryptionKey,
+  } = useChatRoom();
 
-      try {
-        const decryptedMessage = await Encryption.decryptMessage(
-          data.encryptedData,
-          data.iv,
-          encryptionKey
-        );
-
-        setMessagesByRoom((prev) => ({
-          ...prev,
-          [data.room]: [
-            ...(prev[data.room] || []),
-            {
-              text: decryptedMessage,
-              encryptedData: data.encryptedData,
-              iv: data.iv,
-              isSentByUser: false,
-              senderName: data.senderName,
-            },
-          ],
-        }));
-      } catch (error) {
-        console.error("Error decrypting message:", error);
-      }
-    });
-
-    return () => {
-      socketConfig.off("receive_message");
-    };
-  }, [encryptionKey]);
-
-  const handleRoomSelect = async (room: string) => {
-    setSelectedRoom(room);
-    socketConfig.emit("join_room", room);
-
-    try {
-      const key = await Encryption.generateAESKey();
-      setEncryptionKey(key);
-
-      const exportedKey = await Encryption.exportKey(key);
-      socketConfig.emit("share_key", { room, key: exportedKey });
-
-      const messages = await getMessagesByRoom(room);
-
-      const decryptedMessages = await Promise.all(
-        messages.map(async (msg) => ({
-          text: await Encryption.decryptMessage(msg.encryptedData, msg.iv, key),
-          encryptedData: msg.encryptedData,
-          iv: msg.iv,
-          isSentByUser: msg.senderName === username,
-          senderName: msg.senderName,
-        }))
-      );
-
+  useChatSocket({
+    encryptionKey,
+    onMessageReceived: (room, message) => {
       setMessagesByRoom((prev) => ({
         ...prev,
-        [room]: decryptedMessages,
+        [room]: [...(prev[room] || []), message],
       }));
-    } catch (error) {
-      console.error("Error setting up room:", error);
-    }
-  };
-
-  useEffect(() => {
-    socketConfig.on(
-      "receive_key",
-      async (data: { room: string; key: string }) => {
-        if (selectedRoom === data.room) {
-          const importedKey = await Encryption.importKey(data.key);
-          setEncryptionKey(importedKey);
-        }
+    },
+    onKeyReceived: async ({ room, key }) => {
+      if (selectedRoom === room) {
+        const importedKey = await Encryption.importKey(key);
+        setEncryptionKey(importedKey);
       }
-    );
-
-    return () => {
-      socketConfig.off("receive_key");
-    };
-  }, [selectedRoom]);
+    },
+  });
 
   const handleSendMessage = async (message: string) => {
     if (!selectedRoom || !encryptionKey) return;
 
     try {
-      // Enkriptuj poruku
       const { encryptedData, iv } = await Encryption.encryptMessage(
         message,
         encryptionKey
       );
 
-      const messageData = {
+      const messageData: MessageType = {
         encryptedData,
         iv,
         room: selectedRoom,
         senderName: username,
         timestamp: new Date(),
+        text: message,
+        isSentByUser: true,
       };
 
-      // Sačuvaj u bazu
       await saveMessage(messageData);
-
-      // Emituj poruku
       socketConfig.emit("send_message", messageData);
 
-      // Dodaj u lokalni state
       setMessagesByRoom((prev) => ({
         ...prev,
-        [selectedRoom]: [
-          ...(prev[selectedRoom] || []),
-          {
-            text: message,
-            encryptedData,
-            iv,
-            isSentByUser: true,
-            senderName: username,
-          },
-        ],
+        [selectedRoom]: [...(prev[selectedRoom] || []), messageData],
       }));
     } catch (error) {
       console.error("Error encrypting or sending message:", error);
     }
   };
-  const currentMessages = selectedRoom
-    ? messagesByRoom[selectedRoom] || []
-    : [];
 
   return (
     <Container>
-      <Sidebar chatRooms={chatRooms} onRoomSelect={handleRoomSelect} />
+      <Sidebar
+        chatRooms={chatRooms}
+        onRoomSelect={(room) => handleRoomSelect(room, username)}
+      />
       <MainContent>
         <Header>
           {selectedRoom ? `Chat Room: ${selectedRoom}` : `Hello ${username}`}
@@ -171,11 +93,11 @@ export default function ChatRooms() {
         {selectedRoom ? (
           <ChatSection>
             <MessagesContainer>
-              {currentMessages.map((msg, index) => (
+              {(messagesByRoom[selectedRoom] || []).map((msg, index) => (
                 <Message
                   key={index}
-                  text={msg.text}
-                  isSentByUser={msg.isSentByUser}
+                  text={msg.text || ""}
+                  isSentByUser={msg.isSentByUser || false}
                   username={msg.senderName}
                 />
               ))}
