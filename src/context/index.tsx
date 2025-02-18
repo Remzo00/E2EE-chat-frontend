@@ -94,8 +94,8 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     setError(null);
     try {
       const data = await registerUser({ username, email, password });
-      setUser(data.token.user);
-      setToken(data.token.token);
+      setUser(data.user);
+      setToken(data.token);
       setIsAuthenticated(true);
       localStorage.setItem("token", data.token.token);
       localStorage.setItem("user", JSON.stringify(data.token.user));
