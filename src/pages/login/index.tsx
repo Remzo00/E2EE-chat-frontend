@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useContext, useState } from "react";
 import {
   Button,
   Container,
@@ -7,27 +8,31 @@ import {
   Title,
   Footer,
   Link,
+  VerificationTextWrapper,
+  VerificationText,
 } from "./index.styled";
 import { AuthContext } from "../../context";
-import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const { login, isLoading, error, isAuthenticated } = useContext(AuthContext);
+  const { login, isLoading, error } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/chat-rooms");
-    }
-  }, [isAuthenticated, navigate]);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendStatus, setResendStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(formData.email, formData.password);
+    try {
+      await login(formData.email, formData.password);
+    } catch (err) {
+      if (error && error.includes("verify your email")) {
+        setNeedsVerification(true);
+      }
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,26 +48,42 @@ export default function Login() {
         <Title>Login</Title>
         <Input
           type="email"
-          placeholder="Email"
           name="email"
+          placeholder="Email"
           value={formData.email}
           onChange={handleChange}
           disabled={isLoading}
         />
         <Input
           type="password"
-          placeholder="Password"
           name="password"
+          placeholder="Password"
           value={formData.password}
           onChange={handleChange}
           disabled={isLoading}
         />
         <Button disabled={isLoading}>
-          {isLoading ? "Loading..." : "Login"}
+          {isLoading ? "Loading..." : "Sign In"}
         </Button>
-        {error && <p>{error}</p>}
+
+        {error && !needsVerification && <p>{error}</p>}
+
+        {needsVerification && (
+          <VerificationTextWrapper>
+            <VerificationText>
+              Please verify your email before logging in.
+            </VerificationText>
+            {resendStatus === "sending" && <p>Sending verification email...</p>}
+            {resendStatus === "sent" && (
+              <VerificationText>
+                Verification email has been sent. Please check your inbox.
+              </VerificationText>
+            )}
+          </VerificationTextWrapper>
+        )}
+
         <Footer>
-          Don't have an account? <Link href="/register">Sign up</Link>
+          Don't have an account? <Link href="/register">Register</Link>
         </Footer>
       </Form>
     </Container>

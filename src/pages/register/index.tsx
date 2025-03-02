@@ -7,6 +7,8 @@ import {
   Footer,
   Link,
   Title,
+  VerificationText,
+  VerificationTextBold,
 } from "./index.styled";
 import { AuthContext } from "../../context";
 
@@ -18,9 +20,18 @@ export default function Register() {
     password: "",
   });
 
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register(formData.username, formData.email, formData.password);
+    const success = await register(
+      formData.username,
+      formData.email,
+      formData.password
+    );
+    if (success) {
+      setRegistrationSuccess(true);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +40,29 @@ export default function Register() {
       [e.target.name]: e.target.value,
     });
   };
+
+  if (registrationSuccess) {
+    return (
+      <Container>
+        <Form>
+          <Title>Registration Successful!</Title>
+          <VerificationText>
+            We've sent a verification email to{" "}
+            <VerificationTextBold>{formData.email}</VerificationTextBold>.
+            Please check your inbox and click the verification link to activate
+            your account.
+          </VerificationText>
+          <VerificationText>
+            If you don't see the email, please check your spam folder.
+          </VerificationText>
+          <Footer>
+            <Link href="/login">Return to Login</Link>
+          </Footer>
+        </Form>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Form onSubmit={handleSubmit}>

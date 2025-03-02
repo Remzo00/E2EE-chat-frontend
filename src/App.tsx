@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ChatRooms from "./pages/ChatRooms";
 import AuthLayer from "./layer";
+import EmailVerification from "./pages/EmailVerification";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify/:token" element={<EmailVerification />} />
 
         <Route
           path="/"

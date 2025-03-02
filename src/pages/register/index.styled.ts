@@ -24,6 +24,14 @@ color: #ff7f11;
 margin-bottom: 20px;
 `;
 
+export const VerificationText = styled.p`
+  color: white
+`
+
+export const VerificationTextBold = styled.p`
+  color: white
+`
+
 export const Input = styled.input`
 display: block;
 width: 100%;

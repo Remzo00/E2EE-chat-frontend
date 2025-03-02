@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { User } from "../types";
-import { loginUser, registerUser } from "../services/auth";
+import { loginUser, registerUser, verifyEmail } from "../services/auth";
 import { useNavigate } from "react-router-dom";
 
 export type AppContextType = {
@@ -19,8 +19,9 @@ export type AppContextType = {
     username: string,
     email: string,
     password: string
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   logout: () => void;
+  verifyUserEmail: (token: string) => Promise<boolean>;
 };
 
 const AuthContext = createContext<AppContextType>({
@@ -35,8 +36,9 @@ const AuthContext = createContext<AppContextType>({
   setIsLoading: () => {},
   setError: () => {},
   login: async () => {},
-  register: async () => {},
+  register: async () => false,
   logout: () => {},
+  verifyUserEmail: async () => false,
 });
 
 type ContextProviderProps = {
@@ -58,15 +60,22 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
 
     if (storedToken && storedUser) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setToken(storedToken);
-        setIsAuthenticated(true);
+        if (storedUser !== "undefined") {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setToken(storedToken);
+          setIsAuthenticated(true);
+        } else {
+          console.warn("Stored user is 'undefined', clearing storage.");
+          localStorage.removeItem("user");
+        }
       } catch (err) {
         console.error("Error parsing stored user:", err);
+        localStorage.removeItem("user");
       }
     }
   }, []);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
@@ -93,15 +102,24 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await registerUser({ username, email, password });
-      setUser(data.user);
-      setToken(data.token);
-      setIsAuthenticated(true);
-      localStorage.setItem("token", data.token.token);
-      localStorage.setItem("user", JSON.stringify(data.token.user));
-      navigate("/chat-rooms");
+      await registerUser({ username, email, password });
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const verifyUserEmail = async (token: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await verifyEmail(token);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed");
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -132,6 +150,7 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     login,
     register,
     logout,
+    verifyUserEmail,
   };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;

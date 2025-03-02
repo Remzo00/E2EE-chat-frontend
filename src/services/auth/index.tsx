@@ -44,3 +44,46 @@ export const loginUser = async (values: {
     throw new Error(error.response?.data?.message || "Login failed");
   }
 };
+
+export const verifyEmail = async (token: string) => {
+  try {
+    console.log("Token being sent:", token);
+    const config = {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    };
+    const response = await axios.get(`${API_URL}/api/verify/${token}`, config);
+
+    console.log("Backend response data:", response.data);
+
+    return response.data?.message === "Email successfully verified";
+  } catch (error: any) {
+    console.error("Error during email verification:", error);
+
+    return false;
+  }
+};
+
+// export const resendVerificationEmail = async (email: string) => {
+//   try {
+//     const config = {
+//       headers: {
+//         Accept: "application/json",
+//         "Content-Type": "application/json",
+//       },
+//     };
+//     const response = await axios.post(
+//       `${API_URL}/api/resend-verification`,
+//       { email },
+//       config
+//     );
+//     return response.data;
+//   } catch (error: any) {
+//     console.error("Error resending verification email:", error);
+//     throw new Error(
+//       error.response?.data?.message || "Failed to resend verification email"
+//     );
+//   }
+// };
