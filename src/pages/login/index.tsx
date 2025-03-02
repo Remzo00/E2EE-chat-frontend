@@ -13,6 +13,8 @@ import {
 } from "./index.styled";
 import { AuthContext } from "../../context";
 
+type ResendStatus = "idle" | "sending" | "sent" | "error";
+
 export default function Login() {
   const { login, isLoading, error } = useContext(AuthContext);
   const [formData, setFormData] = useState({
@@ -20,9 +22,7 @@ export default function Login() {
     password: "",
   });
   const [needsVerification, setNeedsVerification] = useState(false);
-  const [resendStatus, setResendStatus] = useState<
-    "idle" | "sending" | "sent" | "error"
-  >("idle");
+  const [resendStatus, setResendStatus] = useState<ResendStatus>("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

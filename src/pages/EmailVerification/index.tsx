@@ -13,13 +13,12 @@ import {
   VerificationTextWrapper,
 } from "./index.styled";
 
-//GOOGLAJ STA JE FLAG, FEATURE FLAG
+type VerificationStatus = "verifying" | "success" | "error";
 export default function EmailVerification() {
   const { token } = useParams<{ token: string }>();
   const { verifyUserEmail, isLoading, error } = useContext(AuthContext);
-  const [verificationStatus, setVerificationStatus] = useState<
-    "verifying" | "success" | "error"
-  >("verifying");
+  const [verificationStatus, setVerificationStatus] =
+    useState<VerificationStatus>("verifying");
   const [hasVerified, setHasVerified] = useState(false);
   const navigate = useNavigate();
 
