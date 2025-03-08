@@ -82,6 +82,11 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     setError(null);
     try {
       const data = await loginUser({ email, password });
+
+      if (!data.token || !data.token.user) {
+        throw new Error("Invalid login response");
+      }
+
       setUser(data.token.user);
       setToken(data.token.token);
       setIsAuthenticated(true);
@@ -89,6 +94,7 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
       localStorage.setItem("user", JSON.stringify(data.token.user));
       navigate("/chat-rooms");
     } catch (err) {
+      console.error("Login error:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
@@ -100,11 +106,12 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     email: string,
     password: string,
     captchaToken: string
-  ) => {
+  ): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     try {
       await registerUser({ username, email, password, captchaToken });
+      await login(email, password);
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -113,6 +120,7 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
       setIsLoading(false);
     }
   };
+
   const verifyUserEmail = async (token: string) => {
     setIsLoading(true);
     setError(null);

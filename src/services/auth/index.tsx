@@ -48,7 +48,6 @@ export const loginUser = async (values: {
 
 export const verifyEmail = async (token: string) => {
   try {
-    console.log("Token being sent:", token);
     const config = {
       headers: {
         Accept: "application/json",
@@ -56,8 +55,6 @@ export const verifyEmail = async (token: string) => {
       },
     };
     const response = await axios.get(`${API_URL}/api/verify/${token}`, config);
-
-    console.log("Backend response data:", response.data);
 
     return response.data?.message === "Email successfully verified";
   } catch (error: any) {
