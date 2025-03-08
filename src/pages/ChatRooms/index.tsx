@@ -22,7 +22,6 @@ export default function ChatRooms() {
   const chatRooms = ["General", "Tech Talk", "Gaming", "Movies", "Sports"];
 
   const { user } = useContext(AuthContext);
-  console.log("Current user:", user);
 
   const username = user?.username || "Anonymous";
 

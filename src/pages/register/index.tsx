@@ -103,8 +103,7 @@ export default function Register() {
           disabled={isLoading}
         />
         <ReCAPTCHA
-          // sitekey={import.meta.env.SITE_KEY || ""}
-          sitekey="6LcwcOwqAAAAAG8k2DyJ_2Uy2F7JOkeQXH_Z5dd0"
+          sitekey={import.meta.env.VITE_SITE_KEY}
           onChange={handleCaptcha}
           size="normal"
         />
