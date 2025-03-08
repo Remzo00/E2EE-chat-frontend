@@ -11,6 +11,7 @@ import {
   VerificationTextBold,
 } from "./index.styled";
 import { AuthContext } from "../../context";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Register() {
   const { register, isLoading, error } = useContext(AuthContext);
@@ -19,15 +20,25 @@ export default function Register() {
     email: "",
     password: "",
   });
-
+  const [captchaToken, setCaptchaToken] = useState("");
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
+  const handleCaptcha = (token: string | null) => {
+    if (token) setCaptchaToken(token);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) {
+      alert("Please complete the CAPTCHA");
+      return;
+    }
+
     const success = await register(
       formData.username,
       formData.email,
-      formData.password
+      formData.password,
+      captchaToken
     );
     if (success) {
       setRegistrationSuccess(true);
@@ -90,6 +101,12 @@ export default function Register() {
           value={formData.password}
           onChange={handleChange}
           disabled={isLoading}
+        />
+        <ReCAPTCHA
+          // sitekey={import.meta.env.SITE_KEY || ""}
+          sitekey="6LcwcOwqAAAAAG8k2DyJ_2Uy2F7JOkeQXH_Z5dd0"
+          onChange={handleCaptcha}
+          size="normal"
         />
         <Button disabled={isLoading}>
           {isLoading ? "Loading..." : "Sign Up"}

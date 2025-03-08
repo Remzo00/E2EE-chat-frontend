@@ -18,7 +18,8 @@ export type AppContextType = {
   register: (
     username: string,
     email: string,
-    password: string
+    password: string,
+    captchaToken: string
   ) => Promise<boolean>;
   logout: () => void;
   verifyUserEmail: (token: string) => Promise<boolean>;
@@ -97,12 +98,13 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
   const register = async (
     username: string,
     email: string,
-    password: string
+    password: string,
+    captchaToken: string
   ) => {
     setIsLoading(true);
     setError(null);
     try {
-      await registerUser({ username, email, password });
+      await registerUser({ username, email, password, captchaToken });
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

@@ -6,6 +6,7 @@ export const registerUser = async (values: {
   username: string;
   email: string;
   password: string;
+  captchaToken: string;
 }) => {
   try {
     const config = {
