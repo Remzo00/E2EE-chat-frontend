@@ -2,7 +2,6 @@ import {
   Container,
   CTAButton,
   CTAButtons,
-  HeroImage,
   HeroSection,
   HeroText,
   Title,
@@ -19,10 +18,6 @@ export default function Home() {
             <CTAButton href="/register">Sign Up</CTAButton>
           </CTAButtons>
         </HeroText>
-        <HeroImage
-          src="https://via.placeholder.com/400"
-          alt="Chat illustration"
-        />
       </HeroSection>
     </Container>
   );

@@ -20,7 +20,7 @@ export const HeroText = styled.div`
   max-width: 50%;
   h1 {
     font-size: 2.5rem;
-    color: #282c34;
+    color: #fff;
   }
   p {
     font-size: 1.2rem;
@@ -61,7 +61,3 @@ transition: background 0.3s, transform 0.2s;
 }
 `;
 
-export const HeroImage = styled.img`
-  max-width: 400px;
-  border-radius: 10px;
-`;

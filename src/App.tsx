@@ -11,18 +11,10 @@ function App() {
   return (
     <>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify/:token" element={<EmailVerification />} />
-
-        <Route
-          path="/"
-          element={
-            <AuthLayer>
-              <Home />
-            </AuthLayer>
-          }
-        />
 
         <Route
           path="/chat-rooms"
