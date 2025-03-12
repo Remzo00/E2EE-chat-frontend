@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const Container = styled.div`
   display: flex;
   align-items: center;
-  background: #252525;
+  background-color: ${(props) => props.theme.color.primary};
   padding: 10px;
   border-radius: 8px;
   margin-top: 20px;
@@ -13,14 +13,13 @@ export const Input = styled.input`
   flex: 1;
   padding: 10px;
   font-size: 1rem;
-  color: #fff;
-  background: #333;
+  color: ${(props) => props.theme.color.text};
   border: none;
   border-radius: 8px;
   outline: none;
 
   &::placeholder {
-    color: #aaa;
+    color: ${(props) => props.theme.color.text};
   }
 `;
 

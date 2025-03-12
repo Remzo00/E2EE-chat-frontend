@@ -5,7 +5,7 @@ export const Container = styled.div`
   flex-direction: column;
   height: 100vh;
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1a1a1a, #333);
+  background-color: ${(props) => props.theme.color.secondary};
 `;
 
 export const HeroSection = styled.section`
@@ -20,17 +20,17 @@ export const HeroText = styled.div`
   max-width: 50%;
   h1 {
     font-size: 2.5rem;
-    color: #fff;
+    color: ${props => props.theme.color.text};
   }
   p {
     font-size: 1.2rem;
-    color: #fff;
+    color: ${props => props.theme.color.text};
     margin: 10px 0;
   }
 `;
 
 export const Title = styled.h1`
-    color: white;
+    color: ${props => props.theme.color.text};
 `;
 
 export const CTAButtons = styled.div`
@@ -40,10 +40,10 @@ export const CTAButtons = styled.div`
 `;
 
 export const CTAButton = styled.a`
-  padding: 10px 20px;
+ padding: 10px 20px;
 margin-top: 20px;
-background: #ff7f11;
-color: #fff;
+background: ${(props) => props.theme.color.primary};
+color: ${props => props.theme.color.secondary};
 font-size: 1rem;
 border: none;
 border-radius: 6px;
@@ -52,12 +52,12 @@ text-decoration: none;
 transition: background 0.3s, transform 0.2s;
 
 &:hover {
-  background: #e66a00;
+  opacity: 0.9;
   transform: scale(1.02);
 }
 
 &:active {
-  background: #cc5800;
+  opacity: 0.9;
 }
 `;
 

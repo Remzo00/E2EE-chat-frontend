@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   width: 250px;
-  background: #252525;
+  background-color: ${(props) => props.theme.color.primary};
   display: flex;
   flex-direction: column;
   border-right: 2px solid #333;
@@ -12,8 +12,8 @@ export const Header = styled.div`
   padding: 20px;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ff7f11;
-  border-bottom: 2px solid #333;
+  color: ${(props) => props.theme.color.secondary};
+  border-bottom: 2px solid #fff;
 `;
 
 export const RoomList = styled.ul`
@@ -26,13 +26,13 @@ export const RoomList = styled.ul`
 export const RoomItem = styled.li`
   padding: 15px 20px;
   font-size: 1.2rem;
-  color: #aaa;
+  color: ${(props) => props.theme.color.secondary};
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 
   &:hover {
-    background: #333;
-    color: #ff7f11;
+    background-color: ${(props) => props.theme.color.primary};
+    opacity: 0.5;
   }
 `;
 

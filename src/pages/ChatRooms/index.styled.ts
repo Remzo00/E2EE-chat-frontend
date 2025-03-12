@@ -3,8 +3,7 @@ import styled from "styled-components";
 export const Container = styled.div`
   display: flex;
   height: 100vh;
-  background: #1a1a1a;
-  color: #fff;
+  background-color: ${(props) => props.theme.color.secondary};
 `;
 
 export const MainContent = styled.div`
@@ -14,17 +13,17 @@ export const MainContent = styled.div`
 
 export const Header = styled.h1`
   font-size: 2rem;
-  color: #ff7f11;
+  color: ${(props) => props.theme.color.text};
   margin-bottom: 20px;
 `;
 
 export const Placeholder = styled.div`
-  background: #252525;
+  background-color: ${(props) => props.theme.color.primary};
   padding: 30px;
   border-radius: 12px;
   text-align: center;
   font-size: 1.2rem;
-  color: #aaa;
+  color: ${(props) => props.theme.color.text};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 `;
 
@@ -37,7 +36,7 @@ height: calc(100vh - 150px);
 export const MessagesContainer = styled.div`
   flex: 1;
   overflow-y: auto;
-  background: #1f1f1f;
+  background-color: ${(props) => props.theme.color.secondary2};
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
@@ -45,7 +44,7 @@ export const MessagesContainer = styled.div`
 
 export const Message = styled.div`
   background: #333;
-  color: #fff;
+  color: ${(props) => props.theme.color.text};
   padding: 10px;
   margin-bottom: 8px;
   border-radius: 8px;

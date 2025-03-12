@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 
 export const Container = styled.div<{ isSentByUser: boolean }>`
-display: flex;
+  display: flex;
   flex-direction: column;
   margin: 10px;
   ${({ isSentByUser }) => isSentByUser && 'align-items: flex-end;'}
@@ -19,20 +19,20 @@ export const MessageContainer = styled.div<{ isSentByUser: boolean }>`
     isSentByUser
       ? css`
           align-self: flex-end;
-          background-color: #ff7f11;
+          background-color: ${(props) => props.theme.color.primary};
           color: #fff;
           border-bottom-right-radius: 0;
         `
       : css`
           align-self: flex-start;
-          background-color: #333;
-          color: #fff;
+          background-color: ${(props) => props.theme.color.secondary};
+          color: ${(props) => props.theme.color.text};
           border-bottom-left-radius: 0;
         `}
 `;
 
 export const Username = styled.span`
   font-size: 0.8rem;
-  color: #666;
+  color: ${(props) => props.theme.color.text};
   padding: 0 12px;
 `;
