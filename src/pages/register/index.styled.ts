@@ -32,6 +32,14 @@ export const VerificationTextBold = styled.p`
   color: white
 `
 
+export const InputWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; 
+  width: 100%; 
+`;
+
 export const Input = styled.input`
 display: block;
 width: 100%;
@@ -47,28 +55,6 @@ outline: none;
 &:focus {
   border-color: #ff7f11;
   box-shadow: 0 0 5px #ff7f11;
-}
-`;
-
-export const Button = styled.button`
-width: 100%;
-padding: 12px;
-margin-top: 20px;
-background: #ff7f11;
-color: #fff;
-font-size: 1rem;
-border: none;
-border-radius: 6px;
-cursor: pointer;
-transition: background 0.3s, transform 0.2s;
-
-&:hover {
-  background: #e66a00;
-  transform: scale(1.02);
-}
-
-&:active {
-  background: #cc5800;
 }
 `;
 

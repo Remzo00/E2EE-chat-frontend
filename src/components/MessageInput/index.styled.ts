@@ -24,8 +24,8 @@ export const Input = styled.input`
 `;
 
 export const SendButton = styled.button`
-  background: #ff7f11;
-  color: #fff;
+  background: ${(props) => props.theme.color.secondary};
+  color: ${(props) => props.theme.color.text};
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
@@ -35,6 +35,6 @@ export const SendButton = styled.button`
   transition: background 0.3s;
 
   &:hover {
-    background: #e56e0b;
+    opacity: 0.8;
   }
 `;

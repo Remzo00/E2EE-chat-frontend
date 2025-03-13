@@ -3,15 +3,16 @@ import {
   Container,
   Form,
   Input,
-  Button,
   Footer,
   Link,
   Title,
   VerificationText,
   VerificationTextBold,
+  InputWrapper,
 } from "./index.styled";
 import { AuthContext } from "../../context";
 import ReCAPTCHA from "react-google-recaptcha";
+import Button from "../../components/Button";
 
 export default function Register() {
   const { register, isLoading, error } = useContext(AuthContext);
@@ -78,38 +79,45 @@ export default function Register() {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Title>Register</Title>
-        <Input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <Input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <ReCAPTCHA
-          sitekey={import.meta.env.VITE_SITE_KEY}
-          onChange={handleCaptcha}
-          size="normal"
-        />
-        <Button disabled={isLoading}>
-          {isLoading ? "Loading..." : "Sign Up"}
-        </Button>
+        <InputWrapper>
+          <Input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+          <ReCAPTCHA
+            sitekey={import.meta.env.VITE_SITE_KEY}
+            onChange={handleCaptcha}
+            size="normal"
+          />
+          <Button
+            disabled={isLoading}
+            textColor="white"
+            backgroundColor="#fff"
+            onClick={handleSubmit}
+          >
+            {isLoading ? "Loading..." : "Sign Up"}
+          </Button>
+        </InputWrapper>
         {error && <p>{error}</p>}
         <Footer>
           Already have an account? <Link href="/login">Login</Link>

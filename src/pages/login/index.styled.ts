@@ -34,6 +34,7 @@ background: #1a1a1a;
 color: #fff;
 font-size: 1rem;
 outline: none;
+box-sizing: border-box; 
 
 &:focus {
   border-color: #ff7f11;
@@ -41,26 +42,12 @@ outline: none;
 }
 `;
 
-export const Button = styled.button`
-width: 100%;
-padding: 12px;
-margin-top: 20px;
-background: #ff7f11;
-color: #fff;
-font-size: 1rem;
-border: none;
-border-radius: 6px;
-cursor: pointer;
-transition: background 0.3s, transform 0.2s;
-
-&:hover {
-  opacity: 0.5;
-  transform: scale(1.02);
-}
-
-&:active {
-  opacity: 0.5;
-}
+export const InputWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; 
+  width: 100%; 
 `;
 
 export const Footer = styled.p`

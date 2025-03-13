@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useContext, useState } from "react";
 import {
-  Button,
   Container,
   Form,
   Input,
@@ -10,8 +9,10 @@ import {
   Link,
   VerificationTextWrapper,
   VerificationText,
+  InputWrapper,
 } from "./index.styled";
 import { AuthContext } from "../../context";
+import Button from "../../components/Button";
 
 type ResendStatus = "idle" | "sending" | "sent" | "error";
 
@@ -46,25 +47,32 @@ export default function Login() {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Title>Login</Title>
-        <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <Input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <Button disabled={isLoading}>
-          {isLoading ? "Loading..." : "Sign In"}
-        </Button>
+        <InputWrapper>
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+          <Button
+            disabled={isLoading}
+            textColor="white"
+            backgroundColor="#fff"
+            onClick={handleSubmit}
+          >
+            {isLoading ? "Loading..." : "Sign In"}
+          </Button>
+        </InputWrapper>
 
         {error && !needsVerification && <p>{error}</p>}
 
