@@ -3,7 +3,6 @@ import { useContext, useState } from "react";
 import {
   Container,
   Form,
-  Input,
   Title,
   Footer,
   Link,
@@ -13,6 +12,7 @@ import {
 } from "./index.styled";
 import { AuthContext } from "../../context";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 type ResendStatus = "idle" | "sending" | "sent" | "error";
 
@@ -36,10 +36,10 @@ export default function Login() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (text: string, name: string) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: text,
     });
   };
 
@@ -50,19 +50,15 @@ export default function Login() {
         <InputWrapper>
           <Input
             type="email"
-            name="email"
             placeholder="Email"
             value={formData.email}
-            onChange={handleChange}
-            disabled={isLoading}
+            onChange={(e) => handleChange(e.target.value, "email")}
           />
           <Input
             type="password"
-            name="password"
             placeholder="Password"
             value={formData.password}
-            onChange={handleChange}
-            disabled={isLoading}
+            onChange={(e) => handleChange(e.target.value, "password")}
           />
           <Button
             disabled={isLoading}

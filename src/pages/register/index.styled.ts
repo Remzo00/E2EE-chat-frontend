@@ -40,24 +40,6 @@ export const InputWrapper = styled.div`
   width: 100%; 
 `;
 
-export const Input = styled.input`
-display: block;
-width: 100%;
-padding: 12px;
-margin: 10px 0;
-border: 1px solid #444;
-border-radius: 6px;
-background: #1a1a1a;
-color: #fff;
-font-size: 1rem;
-outline: none;
-
-&:focus {
-  border-color: #ff7f11;
-  box-shadow: 0 0 5px #ff7f11;
-}
-`;
-
 export const Footer = styled.p`
 color: ${(props) => props.theme.color.secondary};
 margin-top: 20px;

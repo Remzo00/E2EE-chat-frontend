@@ -23,25 +23,6 @@ color: ${(props) => props.theme.color.secondary};
 margin-bottom: 20px;
 `;
 
-export const Input = styled.input`
-display: block;
-width: 100%;
-padding: 12px;
-margin: 10px 0;
-border: 1px solid #444;
-border-radius: 6px;
-background: #1a1a1a;
-color: #fff;
-font-size: 1rem;
-outline: none;
-box-sizing: border-box; 
-
-&:focus {
-  border-color: #ff7f11;
-  box-shadow: 0 0 5px #ff7f11;
-}
-`;
-
 export const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;

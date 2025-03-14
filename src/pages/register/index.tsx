@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import {
   Container,
   Form,
-  Input,
   Footer,
   Link,
   Title,
@@ -13,6 +12,7 @@ import {
 import { AuthContext } from "../../context";
 import ReCAPTCHA from "react-google-recaptcha";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 export default function Register() {
   const { register, isLoading, error } = useContext(AuthContext);
@@ -82,27 +82,24 @@ export default function Register() {
         <InputWrapper>
           <Input
             type="text"
-            name="username"
             placeholder="Username"
+            disabled={isLoading}
             value={formData.username}
             onChange={handleChange}
-            disabled={isLoading}
           />
           <Input
             type="email"
-            name="email"
             placeholder="Email"
+            disabled={isLoading}
             value={formData.email}
             onChange={handleChange}
-            disabled={isLoading}
           />
           <Input
             type="password"
-            name="password"
             placeholder="Password"
+            disabled={isLoading}
             value={formData.password}
             onChange={handleChange}
-            disabled={isLoading}
           />
           <ReCAPTCHA
             sitekey={import.meta.env.VITE_SITE_KEY}
