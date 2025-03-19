@@ -11,7 +11,7 @@ export default function Home() {
     <Container>
       <HeroSection>
         <HeroText>
-          <Title>Welcome to ChatApp</Title>
+          <Title>Welcome to UNICHAT</Title>
           <p>Connect with your friends in real-time, anytime, anywhere.</p>
           <CTAButtons>
             <CTAButton href="/login">Get Started</CTAButton>
